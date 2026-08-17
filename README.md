@@ -1,117 +1,109 @@
-# SuperKart Sales Prediction
-
-A machine learning project to forecast product sales for SuperKart retail stores using historical sales and related features. This repository contains code for data preprocessing, model training, evaluation, and inference.
-
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Dataset](#dataset)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Training](#training)
-  - [Evaluation](#evaluation)
-  - [Prediction / Inference](#prediction--inference)
-- [Model & Approach](#model--approach)
-- [Results](#results)
-- [Project Structure](#project-structure)
-- [Requirements](#requirements)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
+# SuperKart Sales Prediction and Deployment
 
 ## Project Overview
-This project builds time-series / regression models to predict daily or weekly sales for SuperKart stores. It includes data cleaning pipelines, feature engineering, baseline models, and scripts to train and evaluate more advanced models.
+This repository provides an end-to-end solution for forecasting sales revenue for SuperKart, a retail chain. The project involves developing a machine learning model, creating a Flask-based API for model serving, and building a Streamlit user interface for interactive predictions. The entire system is designed for containerized deployment using Docker and GitHub Codespaces.
 
-## Features
-- Data ingestion and cleaning scripts
-- Feature engineering for time and store-level features
-- Training and evaluation pipelines
-- Model checkpointing and simple result visualization
-- Example inference script for making predictions on new data
+### Objective
+SuperKart aims to optimize inventory management and refine regional sales strategies by accurately forecasting sales revenue for its outlets for the upcoming quarter. This solution operationalizes a predictive model based on historical sales data into a robust, deployable system.
 
-## Dataset
-Describe here where the dataset lives and its schema. Example:
-- Source: `data/sales.csv` (replace with actual path)
-- Typical columns: `date`, `store_id`, `item_id`, `sales`, `promotion`, `holiday`, `price`, ...
-- Notes: Any preprocessing steps (e.g., missing-value handling, aggregations)
+## Key Features
+- **Machine Learning Model:** A `RandomForestRegressor` trained on historical sales data, with hyperparameters optimized using `GridSearchCV`.
+- **Flask API Backend:** A RESTful API built with Flask (`superkart_api.py`) exposing:
+  - `/v1/predict`: For real-time, single-instance predictions (JSON input).
+  - `/v1/predictbatch`: For batch predictions, accepting CSV file uploads.
+- **Streamlit Frontend:** An interactive web application (`streamlit_app.py`) for users to input features and get sales predictions through an intuitive interface.
+- **Containerization:** Both the Flask API and Streamlit UI are containerized using Docker, ensuring consistent environments and ease of deployment.
+- **Orchestration:** `docker-compose.yml` (to be added/configured) orchestrates the multi-service application, enabling the backend and frontend to communicate seamlessly.
+- **GitHub Codespaces Integration:** Designed for development and deployment within GitHub Codespaces for a streamlined MLOps workflow.
 
-If your dataset comes from an external source, indicate download instructions or provide a script to fetch it.
+## Technologies Used
+- **Python** (3.9+)
+- **Data Science Libraries:** `pandas`, `numpy`, `scikit-learn`
+- **Machine Learning Models:** `RandomForestRegressor`, `DecisionTreeRegressor`
+- **API Framework:** `Flask`
+- **Frontend Framework:** `Streamlit`
+- **Containerization:** `Docker`
+- **Development/Deployment Environment:** `GitHub Codespaces`
+- **HTTP Requests:** `requests` library
+- **Model Serialization:** `joblib`
 
-## Installation
-1. Clone the repository:
-   git clone https://github.com/vandanareddysvit/superkart-sales-prediction.git
-2. Create and activate a virtual environment (recommended):
-   python -m venv .venv
-   source .venv/bin/activate  # macOS / Linux
-   .venv\Scripts\activate     # Windows
-3. Install dependencies:
-   pip install -r requirements.txt
+## Getting Started
+These instructions will get you a copy of the project up and running on your local machine or, ideally, within a GitHub Codespace for development and testing purposes.
+
+### Prerequisites
+- A GitHub account.
+- Docker Desktop installed (if running locally).
+- Access to GitHub Codespaces (recommended).
+
+### Setup within GitHub Codespaces (Recommended)
+1.  **Fork this repository** to your GitHub account.
+2.  **Open the repository in a Codespace:** On your forked repository page, click the green `Code` button and select `Create codespace on main`.
+3.  **Wait for Codespace to initialize:** Your Codespace will provision, and Docker containers will be built and started according to the `docker-compose.yml` (if provided, otherwise you will build them manually).
+4.  **Forwarded Ports:** Ensure ports `5000` (for Flask API) and `8501` (for Streamlit UI) are forwarded and set to `Public` in the Codespaces 'Ports' tab.
+
+### Local Setup (Alternative)
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/vandanareddysvit/superkart-sales-prediction.git
+    cd superkart-sales-prediction
+    ```
+2.  **Build and run Docker containers:**
+    If a `docker-compose.yml` is provided:
+    ```bash
+    docker-compose up --build
+    ```
+    Otherwise, you'll need to build and run the Flask and Streamlit containers separately:
+    ```bash
+    # Build Flask API image
+    docker build -t superkart-api -f model_api/Dockerfile .
+    # Run Flask API container
+    docker run -d -p 5000:5000 --name superkart_backend superkart-api
+
+    # Build Streamlit UI image
+    docker build -t superkart-streamlit -f model_api/Dockerfile.streamlit .
+    # Run Streamlit UI container (linking to Flask backend)
+    docker run -d -p 8501:8501 --name superkart_frontend --link superkart_backend:superkart_backend superkart-streamlit
+    ```
 
 ## Usage
+Once the containers are running and ports are forwarded:
 
-### Training
-Train a model with the default configuration:
-python src/train.py --config configs/train.yaml
-
-Common options:
-- --config: path to YAML config
-- --epochs / --n-estimators: model-specific params
-
-### Evaluation
-Evaluate the trained model on a test split:
-python src/evaluate.py --model-path outputs/checkpoint.pkl --test-data data/test.csv
-
-### Prediction / Inference
-Predict sales on new data:
-python src/predict.py --model-path outputs/checkpoint.pkl --input data/new_data.csv --output results/predictions.csv
-
-Replace script names/args above with actual script names if different.
-
-## Model & Approach
-- Baseline: Linear regression / Random Forest
-- Advanced: Gradient boosting (XGBoost / LightGBM) or LSTM for sequence modeling
-- Evaluation metrics: RMSE, MAE, R²
-- Cross-validation: time-series aware splitting / walk-forward validation
-
-## Results
-Summarize main results here (best model, metrics). Example:
-- LightGBM achieved RMSE = 123.45 on test set.
-- Baseline (seasonal naive) RMSE = 210.78.
-
-Include plots/screenshots if available in `reports/` or `notebooks/`.
+- **Access the Streamlit UI:** Open your browser to the forwarded URL for port `8501` (e.g., `https://<your-codespace-url>-8501.app.github.dev`).
+- **Test the Flask API (Health Check):** Access the `/health` endpoint at your forwarded API URL (e.g., `https://<your-codespace-url>-5000.app.github.dev/health`).
+- **Test API endpoints using `curl` or `requests`:**
+  - **Online Prediction (`/v1/predict`):**
+    ```bash
+    curl -X POST \
+         -H "Content-Type: application/json" \
+         -d '{ "Product_Weight": 12.66, "Product_Sugar_Content": "Low Sugar", "Product_Allocated_Area": 0.027, "Product_MRP": 117.08, "Store_Size": "Medium", "Store_Location_City_Type": "Tier 2", "Store_Type": "Supermarket Type2", "Product_Id_char": "FD", "Store_Age_Years": 16, "Product_Type_Category": "Non Perishables" }' \
+         https://<your-codespace-url>-5000.app.github.dev/v1/predict
+    ```
+  - **Batch Prediction (`/v1/predictbatch`):**
+    (First, create a `batch_data.csv` file with your batch input data)
+    ```bash
+    curl -X POST -F "file=@batch_data.csv" https://<your-codespace-url>-5000.app.github.dev/v1/predictbatch
+    ```
 
 ## Project Structure
-A suggested layout (update to match repo):
-- data/                # raw and processed datasets
-- src/                 # training, evaluation, and utility scripts
-- notebooks/           # exploratory analysis and experiments
-- configs/             # YAML configs for experiments
-- outputs/             # model checkpoints and artifacts
-- requirements.txt
-- README.md
+```
+.github/
+├── codespaces/
+│   └── .devcontainer/
+│       └── devcontainer.json  # Codespaces configuration
+├── workflows/
+│   └── ...                    # CI/CD workflows (if any)
+├── README.md                  # This file
+├── superkart_notebook.ipynb   # Jupyter Notebook for EDA, modeling, and deployment steps
+├── model/
+│   ├── superkart_model.joblib # Trained ML model
+│   └── preprocessor.joblib    # Fitted preprocessor
+└── model_api/
+    ├── superkart_api.py       # Flask API application
+    ├── streamlit_app.py       # Streamlit frontend application
+    ├── requirements.txt       # Python dependencies for Flask
+    ├── streamlit_requirements.txt # Python dependencies for Streamlit
+    ├── Dockerfile             # Dockerfile for Flask API
+    └── Dockerfile.streamlit   # Dockerfile for Streamlit UI
 
-## Requirements
-Key libraries:
-- Python 3.8+
-- pandas, numpy
-- scikit-learn
-- lightgbm / xgboost (optional)
-- matplotlib / seaborn
-
-Install all with:
-pip install -r requirements.txt
-
-## Contributing
-Contributions are welcome. Suggested workflow:
-1. Fork the repo
-2. Create a feature branch: git checkout -b feat/your-feature
-3. Make changes, add tests if applicable
-4. Open a pull request describing your changes
-
-## License
-Specify the license (e.g., MIT). If none yet, add a LICENSE file.
-
-## Contact
-Author: Vandana Reddy
-GitHub: https://github.com/vandanareddysvit
-Email: (add your email)
+# ... other data files or configuration ...
+```

@@ -16,9 +16,9 @@ EXPOSE 5000
 # Set the FLASK_APP environment variable
 ENV FLASK_APP=superkart_api.py
 
-# Move the 'model' directory into /app (same level as 'model_api')
+# Move the 'backend_files' directory into /app (same level as 'model_api')
 # This ensures both the Flask app and the model/preprocessor are accessible
-RUN mv /app/model /app/
+RUN mv /app/backend_files /app/
 
 # Run the Flask application
 # For development, you might use 'flask run --host=0.0.0.0'

@@ -83,27 +83,3 @@ Once the containers are running and ports are forwarded:
     ```bash
     curl -X POST -F "file=@batch_data.csv" https://<your-codespace-url>-5000.app.github.dev/v1/predictbatch
     ```
-
-## Project Structure
-```
-.github/
-├── codespaces/
-│   └── .devcontainer/
-│       └── devcontainer.json  # Codespaces configuration
-├── workflows/
-│   └── ...                    # CI/CD workflows (if any)
-├── README.md                  # This file
-├── superkart_notebook.ipynb   # Jupyter Notebook for EDA, modeling, and deployment steps
-├── model/
-│   ├── superkart_model.joblib # Trained ML model
-│   └── preprocessor.joblib    # Fitted preprocessor
-└── model_api/
-    ├── superkart_api.py       # Flask API application
-    ├── streamlit_app.py       # Streamlit frontend application
-    ├── requirements.txt       # Python dependencies for Flask
-    ├── streamlit_requirements.txt # Python dependencies for Streamlit
-    ├── Dockerfile             # Dockerfile for Flask API
-    └── Dockerfile.streamlit   # Dockerfile for Streamlit UI
-
-# ... other data files or configuration ...
-```
